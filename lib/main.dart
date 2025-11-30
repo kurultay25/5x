@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized(); // Added this line
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     const MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -21,12 +21,22 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final WebViewController controller;
+  bool isLoading = true; // Added this line
 
   @override
   void initState() {
     super.initState();
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            setState(() {
+              isLoading = false; // Added this line
+            });
+          },
+        ),
+      )
       ..loadRequest(
         Uri.parse('https://x5-233568038472.us-west1.run.app/'),
       );
@@ -36,8 +46,16 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: WebViewWidget(
-          controller: controller,
+        child: Stack(
+          children: [
+            WebViewWidget(
+              controller: controller,
+            ),
+            if (isLoading) // Added this line
+              const Center( // Added this line
+                child: CircularProgressIndicator(), // Added this line
+              ), // Added this line
+          ],
         ),
       ),
     );
